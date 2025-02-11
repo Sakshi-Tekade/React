@@ -1,72 +1,96 @@
-//Blogging App using Hooks
-import {useState} from "react"
-export default function Blog(){
-    const [title, setTitle] = useState();
-    const [content, setContent] = useState();
-    const [blog, setBlog] = useState([]);
-    //Passing the synthetic event as argument to stop refreshing the page on submit
-    function handleSubmit(e){
+//Blogging App with Firebase
+import { useState, useRef, useEffect } from "react";
+export default function Blog() {
+
+    const [formData, setformData] = useState({ title: "", content: "" })
+    const [blogs, setBlogs] = useState([]);
+
+    const titleRef = useRef(null);
+
+    useEffect(() => {
+        titleRef.current.focus()
+    }, []);
+
+    async function handleSubmit(e) {
         e.preventDefault();
-        setBlog([{title, content}, ...blog]);
-        console.log(blog);
+        titleRef.current.focus();
+
+        setBlogs([{ title: formData.title, content: formData.content }, ...blogs]);
+
+        setformData({ title: "", content: "" });
     }
 
-    return(
+    async function removeBlog(i) {
+
+        setBlogs(blogs.filter((blog, index) => index !== i));
+
+    }
+
+    return (
         <>
-        {/* Heading of the page */}
-        <h1>Write a Blog!</h1>
+            <h1>Write a Blog!</h1>
+            <div className="section">
 
-        {/* Division created to provide styling of section to the form */}
-        <div className="section">
-
-        {/* Form for to write the blog */}
-            <form onSubmit={handleSubmit}>
-
-                {/* Row component to create a row for first input field */}
-                <Row label="Title">
+                {/* Form for to write the blog */}
+                <form onSubmit={handleSubmit}>
+                    <Row label="Title">
                         <input className="input"
-                                placeholder="Enter the Title of the Blog here.." value={title}
-                                onChange={(e)=>setTitle(e.target.value)}
-                                />
-                </Row >
+                            placeholder="Enter the Title of the Blog here.."
+                            ref={titleRef}
+                            value={formData.title}
+                            onChange={(e) => setformData({ title: e.target.value, content: formData.content })}
+                        />
+                    </Row >
 
-                {/* Row component to create a row for Text area field */}
-                <Row label="Content">
+                    <Row label="Content">
                         <textarea className="input content"
-                                placeholder="Content of the Blog goes here.." value={content}
-                                onChange={(e)=>setContent(e.target.value)}
-                                />
-                </Row >
+                            placeholder="Content of the Blog goes here.."
+                            required
+                            value={formData.content}
+                            onChange={(e) => setformData({ title: formData.title, content: e.target.value })}
+                        />
+                    </Row >
 
-                {/* Button to submit the blog */}            
-                <button className = "btn">ADD</button>
-            </form>
-                     
-        </div>
+                    <button className="btn">ADD</button>
+                </form>
 
-        <hr/>
-
-        {/* Section where submitted blogs will be displayed */}
-        <h2> Blogs </h2>
-        {blog.map((blg,i)=>(
-            <div className="blog" key={i}>
-            <h3>{blg.title}</h3>
-            <p>{blg.content}</p>
             </div>
-))}
-        
+
+            <hr />
+
+            {/* Section where submitted blogs will be displayed */}
+            <h2> Blogs </h2>
+            {blogs.map((blog, i) => (
+                <div className="blog" key={i}>
+                    <h3>{blog.title}</h3>
+                    <hr />
+                    <p>{blog.content}</p>
+
+                    <div className="blog-btn">
+                        <button onClick={() => {
+                            removeBlog(i)
+                        }}
+                            className="btn remove">
+
+                            Delete
+
+                        </button>
+                    </div>
+                </div>
+            ))}
+
         </>
-        )
-    }
+    )
+}
 
 //Row component to introduce a new row section in the form
-function Row(props){
-    const{label} = props;
-    return(
+function Row(props) {
+    const { label } = props;
+    return (
         <>
-        <label>{label}<br/></label>
-        {props.children}
-        <hr />
+            <label>{label}<br /></label>
+            {props.children}
+            <hr />
         </>
     )
 }
